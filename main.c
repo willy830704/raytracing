@@ -51,14 +51,14 @@ int main()
     /* do the ray tracing with the given geometry */
     clock_gettime(CLOCK_REALTIME, &start);
 
-/* 
-    #pragma omp parallel for num_threads(4) 
-    for(int i=1;i<=4;i++){
-	printf("i=%d threadid=%d\n",i,omp_get_thread_num());
-    raytracing(pixels, background,
-               rectangulars, spheres, lights, &view, ROWS, COLS,i);
-    }
-*/
+    /*
+        #pragma omp parallel for num_threads(4)
+        for(int i=1;i<=4;i++){
+    	printf("i=%d threadid=%d\n",i,omp_get_thread_num());
+        raytracing(pixels, background,
+                   rectangulars, spheres, lights, &view, ROWS, COLS,i);
+        }
+    */
 
     raytracing(pixels, background,
                rectangulars, spheres, lights, &view, ROWS, COLS,0);

@@ -456,7 +456,7 @@ static unsigned int ray_color(const point3 e, double t,
 void raytracing(uint8_t *pixels, color background_color,
                 rectangular_node rectangulars, sphere_node spheres,
                 light_node lights, const viewpoint *view,
-                int width, int height)
+                int width, int height, int type)
 {
     point3 u, v, w, d;
     color object_color = { 0.0, 0.0, 0.0 };
@@ -465,10 +465,33 @@ void raytracing(uint8_t *pixels, color background_color,
     calculateBasisVectors(u, v, w, view);
 
     idx_stack stk;
-
+    int up,down,left,right;
+    switch(type){
+	case 1:
+	    up=0; down=height/2;
+	    left=0; right=width/2;
+	    break;
+	case 2:
+	    up=height/2; down=height;
+            left=0; right=width/2;
+	    break;
+	case 3:
+	    up=0; down=height/2;
+            left=width/2; right=width;
+	    break;
+	case 4:
+	    up=height/2; down=height;
+            left=width/2; right=width;
+	    break;
+        case 0:
+	    up=0; down=height;
+	    left=0; right=width;
+    }
     int factor = sqrt(SAMPLES);
-    for (int j = 0; j < height; j++) {
-        for (int i = 0; i < width; i++) {
+
+    #pragma omp parallel for num_threads(128) private(stk) private(d) private(object_color)    
+    for (int j = up; j < down; j++) {
+        for (int i = left; i < right; i++) {
             double r = 0, g = 0, b = 0;
             /* MSAA */
             for (int s = 0; s < SAMPLES; s++) {
@@ -489,10 +512,13 @@ void raytracing(uint8_t *pixels, color background_color,
                     g += background_color[1];
                     b += background_color[2];
                 }
-                pixels[((i + (j * width)) * 3) + 0] = r * 255 / SAMPLES;
+		
+		pixels[((i + (j * width)) * 3) + 0] = r * 255 / SAMPLES;
                 pixels[((i + (j * width)) * 3) + 1] = g * 255 / SAMPLES;
                 pixels[((i + (j * width)) * 3) + 2] = b * 255 / SAMPLES;
+	
             }
         }
     }
+    
 }
